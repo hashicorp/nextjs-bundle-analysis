@@ -1,0 +1,48 @@
+{
+  "name": "nextjs-bundle-analysis",
+  "version": "0.0.0",
+  "description": "Analyzes each PR's impact on your next.js app's bundle size and displays it using a comment",
+  "main": "index.js",
+  "bin": {
+    "generate": "./generate.js",
+    "report": "./report.js",
+    "compare": "./compare.js"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hashicorp/nextjs-bundle-analysis.git"
+  },
+  "keywords": [
+    "next",
+    "nextjs",
+    "bundle",
+    "analysis",
+    "github",
+    "action"
+  ],
+  "author": "Jeff Escalante",
+  "license": "GPL-2.0",
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__fixtures__/"
+    ]
+  },
+  "bugs": {
+    "url": "https://github.com/hashicorp/nextjs-bundle-analysis/issues"
+  },
+  "homepage": "https://github.com/hashicorp/nextjs-bundle-analysis#readme",
+  "dependencies": {
+    "filesize": "^7.0.0",
+    "gzip-size": "^6.0.0",
+    "mkdirp": "^1.0.4",
+    "number-to-words": "^1.2.4"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6",
+    "rimraf": "^3.0.2"
+  }
+}
