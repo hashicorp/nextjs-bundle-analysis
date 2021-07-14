@@ -29,7 +29,7 @@ jobs:
       # Here's the first place where we actually use this package.
       # This step pulls the raw bundle stats for the current bundle
       - name: Build and analyze bundle
-        run: npx nextjs-bundle-analysis report
+        run: npx -p nextjs-bundle-analysis report
 
       - name: Upload bundle
         uses: actions/upload-artifact@v2
@@ -60,7 +60,7 @@ jobs:
       # are our most sensible defaults.
       - name: Compare with base branch bundle
         if: success() && github.event.number
-        run: ls -laR .next/analyze/base && npx nextjs-bundle-analysis compare
+        run: ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis compare
 
       - name: Get comment body
         id: get-comment-body
