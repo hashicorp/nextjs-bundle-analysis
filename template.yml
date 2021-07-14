@@ -60,7 +60,7 @@ jobs:
       # are our most sensible defaults.
       - name: Compare with base branch bundle
         if: success() && github.event.number
-        run: ls -laR .next/analyze/base && npx nextjs-bundle-analysis compare --budget=358400 --red-status-percentage=20
+        run: ls -laR .next/analyze/base && npx nextjs-bundle-analysis compare
 
       - name: Get comment body
         id: get-comment-body
