@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+const path = require('path')
+const fs = require('fs')
+const mkdirp = require('mkdirp')
 const inquirer = require('inquirer')
 
 inquirer
@@ -23,13 +26,30 @@ inquirer
       name: 'redIndicatorPercentage',
       message:
         'If you exceed this percentage of the budget or filesize, it will be highlighted in red',
-      default: '20',
+      default: 20,
     },
   ])
   .then((answers) => {
-    answers.budget = answers.budget * 1024
-    console.log(answers)
-    // write values to pacakge.json
+    // write the config values to package.json
+    const packageJsonPath = path.join(process.cwd(), 'package.json')
+    const packageJsonContent = require(packageJsonPath)
+    packageJsonContent.nextBundleAnalysis = {
+      budget: answers.budget * 1024,
+      budgetPercentIncreaseRed: answers.redIndicatorPercentage,
+    }
+    fs.writeFileSync(
+      packageJsonPath,
+      JSON.stringify(packageJsonContent, null, 2)
+    )
     // mkdir -p the .workflows directory
+    const workflowsPath = path.join(process.cwd(), '.workflows')
+    mkdirp.sync(workflowsPath)
+
     // copy the template to it
+    const templatePath = path.join(__dirname, 'template.yml')
+    const destinationPath = path.join(
+      workflowsPath,
+      'nextjs_bundle_analysis.yml'
+    )
+    fs.copyFileSync(templatePath, destinationPath)
   })
