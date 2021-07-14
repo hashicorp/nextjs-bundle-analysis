@@ -42,7 +42,7 @@ inquirer
       JSON.stringify(packageJsonContent, null, 2)
     )
     // mkdir -p the .workflows directory
-    const workflowsPath = path.join(process.cwd(), '.workflows')
+    const workflowsPath = path.join(process.cwd(), '.github/workflows')
     mkdirp.sync(workflowsPath)
 
     // copy the template to it
