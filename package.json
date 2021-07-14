@@ -1,6 +1,6 @@
 {
   "name": "nextjs-bundle-analysis",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Analyzes each PR's impact on your next.js app's bundle size and displays it using a comment",
   "main": "index.js",
   "bin": {
@@ -9,7 +9,10 @@
     "compare": "./compare.js"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "release:patch": "release patch && npm publish .",
+    "release:minor": "release minor && npm publish .",
+    "release:major": "release major && npm publish ."
   },
   "repository": {
     "type": "git",
@@ -44,6 +47,7 @@
   },
   "devDependencies": {
     "jest": "^27.0.6",
+    "release": "^6.3.0",
     "rimraf": "^3.0.2"
   }
 }
