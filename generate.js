@@ -30,6 +30,9 @@ inquirer
     },
   ])
   .then((answers) => {
+    // add a default "showDetails" argument
+    Object.assign(answers, { showDetails: true })
+
     // write the config values to package.json
     const packageJsonPath = path.join(process.cwd(), 'package.json')
     const packageJsonContent = require(packageJsonPath)
