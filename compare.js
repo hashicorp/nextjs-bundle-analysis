@@ -23,7 +23,9 @@ const options = require(path.join(
 
 const BUDGET = options.budget
 const BUDGET_PERCENT_INCREASE_RED = options.budgetPercentIncreaseRed
-const SHOW_DETAILS = options.showDetails
+// this must be explicitly set to false not to render
+const SHOW_DETAILS =
+  options.showDetails === undefined ? true : options.showDetails
 
 // kick it off
 let output = `## 📦 Next.js Bundle Analysis
