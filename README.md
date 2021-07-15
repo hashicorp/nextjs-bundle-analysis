@@ -6,7 +6,7 @@ Analyzes each PR's impact on your next.js app's bundle size and displays it usin
 
 ### Installation
 
-It's pretty simple to get this set up, just run the following command and answer the prompts. The command will create a `.workflows` directory in your project root and add a `next_bundle_analysis.yml` file to it - that's all it takes!
+It's pretty simple to get this set up, just run the following command and answer the prompts. The command will create a `.github/workflows` directory in your project root and add a `next_bundle_analysis.yml` file to it - that's all it takes!
 
 ```sh
 $ npx -p nextjs-bundle-analysis generate
