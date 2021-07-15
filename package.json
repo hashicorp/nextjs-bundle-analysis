@@ -1,6 +1,6 @@
 {
   "name": "nextjs-bundle-analysis",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Analyzes each PR's impact on your next.js app's bundle size and displays it using a comment",
   "bin": {
     "generate": "./generate.js",
