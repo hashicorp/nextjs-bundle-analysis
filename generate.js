@@ -36,6 +36,7 @@ inquirer
     packageJsonContent.nextBundleAnalysis = {
       budget: answers.budget * 1024,
       budgetPercentIncreaseRed: answers.redIndicatorPercentage,
+      showDetails: true, // add a default "showDetails" argument
     }
     fs.writeFileSync(
       packageJsonPath,

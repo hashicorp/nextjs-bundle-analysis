@@ -4,12 +4,12 @@ on:
   pull_request:
   push:
     branches:
-      - main # or whatever your main branch name is
+      - main # change this if your default branch is named differently
   workflow_dispatch:
 
 defaults:
   run:
-    # if your nextjs app does not live at the root of the repo, you should change this
+    # change this if your nextjs app does not live at the root of the repo
     working-directory: ./
 
 jobs:
@@ -29,7 +29,7 @@ jobs:
       - name: Build next.js app
         run: ./node_modules/.bin/next build
 
-      # Here's the first place where we actually use this package.
+      # Here's the first place where next-bundle-analysis' own script is used
       # This step pulls the raw bundle stats for the current bundle
       - name: Analyze bundle
         run: npx -p nextjs-bundle-analysis report
@@ -50,7 +50,7 @@ jobs:
 
       # And here's the second place - this runs after we have both the current and
       # base branch bundle stats, and will compare them to determine what changed.
-      # There are two configurable arguments:
+      # There are two configurable arguments that come from package.json:
       #
       # - budget: optional, set a budget (bytes) against which size changes are measured
       #           it's set to 350kb here by default, as informed by the following piece:
@@ -59,8 +59,8 @@ jobs:
       # - red-status-percentage: sets the percent size increase where you get a red
       #                          status indicator, defaults to 20%
       #
-      # Either of these arguments can be changed or removed, the numbers provided here
-      # are our most sensible defaults.
+      # Either of these arguments can be changed or removed by editing the `nextBundleAnalysis`
+      # entry in your package.json file.
       - name: Compare with base branch bundle
         if: success() && github.event.number
         run: ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis compare
