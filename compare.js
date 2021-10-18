@@ -194,7 +194,7 @@ function markdownTable(_data, globalBundleCurrent, globalBundleBase) {
   // first we set up the table headers
   return `Page | Size (compressed) | ${
     globalBundleCurrent ? `First Load |` : ''
-  }${showBudgetDiff ? ` % of Budget (\`${filesize(BUDGET)}\`) |` : ''}
+  }${showBudget ? ` % of Budget (\`${filesize(BUDGET)}\`) |` : ''}
 |---|---|${globalBundleCurrent ? '---|' : ''}${showBudget ? '---|' : ''}
 ${data
   .map((d) => {
