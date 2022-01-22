@@ -5,19 +5,28 @@ const fs = require('fs')
 const gzSize = require('gzip-size')
 const mkdirp = require('mkdirp')
 
-// first we check to make sure that the `.next` directory exists
-const nextMetaRoot = path.join(process.cwd(), '.next')
+// Pull options from `package.json`
+const options = require(path.join(
+  process.cwd(),
+  'package.json'
+)).nextBundleAnalysis
+
+// by default, Next.js builds to the `.next` directory
+const BUILD_OUTPUT_DIRECTORY = options.buildOutputDirectory || '.next'
+
+// first we check to make sure that the build output directory exists
+const nextMetaRoot = path.join(process.cwd(), BUILD_OUTPUT_DIRECTORY)
 try {
   fs.accessSync(nextMetaRoot, fs.constants.R_OK)
 } catch (err) {
   console.error(
-    `No ".next" directory found at "${nextMetaRoot}" - you may not have your working directory set correctly, or not have run "next build".`
+    `No build output found at "${nextMetaRoot}" - you may not have your working directory set correctly, or not have run "next build".`
   )
   process.exit(1)
 }
 
 // if so, we can import the build manifest
-const buildMeta = require(path.join(process.cwd(), '.next/build-manifest.json'))
+const buildMeta = require(path.join(nextMetaRoot, 'build-manifest.json'))
 
 // this memory cache ensures we dont read any script file more than once
 // bundles are often shared between pages

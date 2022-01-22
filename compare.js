@@ -5,16 +5,6 @@ const numberToWords = require('number-to-words')
 const fs = require('fs')
 const path = require('path')
 
-// import the current and base branch bundle stats
-const currentBundle = require(path.join(
-  process.cwd(),
-  '.next/analyze/__bundle_analysis.json'
-))
-const baseBundle = require(path.join(
-  process.cwd(),
-  '.next/analyze/base/bundle/__bundle_analysis.json'
-))
-
 // Pull options from `package.json`
 const options = require(path.join(
   process.cwd(),
@@ -26,6 +16,20 @@ const BUDGET_PERCENT_INCREASE_RED = options.budgetPercentIncreaseRed
 // this must be explicitly set to false not to render
 const SHOW_DETAILS =
   options.showDetails === undefined ? true : options.showDetails
+// by default, Next.js builds to the `.next` directory
+const BUILD_OUTPUT_DIRECTORY = options.buildOutputDirectory || '.next'
+
+// import the current and base branch bundle stats
+const currentBundle = require(path.join(
+  process.cwd(),
+  BUILD_OUTPUT_DIRECTORY,
+  'analyze/__bundle_analysis.json'
+))
+const baseBundle = require(path.join(
+  process.cwd(),
+  BUILD_OUTPUT_DIRECTORY,
+  'analyze/base/bundle/__bundle_analysis.json'
+))
 
 // kick it off
 let output = `## 📦 Next.js Bundle Analysis
@@ -173,7 +177,11 @@ console.log(output)
 // and to cap it off, we write the output to a file which is later read in as comment
 // contents by the actions workflow.
 fs.writeFileSync(
-  path.join(process.cwd(), '.next/analyze/__bundle_analysis_comment.txt'),
+  path.join(
+    process.cwd(),
+    BUILD_OUTPUT_DIRECTORY,
+    'analyze/__bundle_analysis_comment.txt'
+  ),
   output.trim()
 )
 

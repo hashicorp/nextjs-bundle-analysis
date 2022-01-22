@@ -20,6 +20,8 @@ Config values are written to `package.json` under the key `nextBundleAnalysis`, 
 
 There is one config value, `showDetails`, that is set to "true" by default. This option renders a collapsed "details" section under each section of the bundle analysis comment explaining some of the finer details of the numbers provided. If you feel like this is not necessary and you and/or those working on your project understand the details, you can set this option to `false` and that section will not render.
 
+If your application builds to a directory other than `.next`, you can specify this with the key `buildOutputDirectory`.
+
 ### Caveats
 
 - This plugin only analyzes the direct bundle output from next.js. If you have added any other scripts via the `<script>` tag, especially third party scripts and things like analytics or other tracking scripts, these are not included in the analysis. Scripts of this nature should _probably_ be loaded in behind a consent manager and should not make an impact on your initial load, and as long as this is how you handle them it should make no difference, but it's important to be aware of this and account for the extra size added by these scripts if they are present in your app.
