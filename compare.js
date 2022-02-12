@@ -4,20 +4,17 @@ const filesize = require('filesize')
 const numberToWords = require('number-to-words')
 const fs = require('fs')
 const path = require('path')
+const { getBuildOutputDirectory, getOptions } = require('./utils')
 
 // Pull options from `package.json`
-const options = require(path.join(
-  process.cwd(),
-  'package.json'
-)).nextBundleAnalysis
+const options = getOptions()
 
 const BUDGET = options.budget
 const BUDGET_PERCENT_INCREASE_RED = options.budgetPercentIncreaseRed
 // this must be explicitly set to false not to render
 const SHOW_DETAILS =
   options.showDetails === undefined ? true : options.showDetails
-// by default, Next.js builds to the `.next` directory
-const BUILD_OUTPUT_DIRECTORY = options.buildOutputDirectory || '.next'
+const BUILD_OUTPUT_DIRECTORY = getBuildOutputDirectory(options)
 
 // import the current and base branch bundle stats
 const currentBundle = require(path.join(

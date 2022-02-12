@@ -4,15 +4,11 @@ const path = require('path')
 const fs = require('fs')
 const gzSize = require('gzip-size')
 const mkdirp = require('mkdirp')
+const { getBuildOutputDirectory, getOptions } = require('./utils')
 
 // Pull options from `package.json`
-const options = require(path.join(
-  process.cwd(),
-  'package.json'
-)).nextBundleAnalysis
-
-// by default, Next.js builds to the `.next` directory
-const BUILD_OUTPUT_DIRECTORY = options.buildOutputDirectory || '.next'
+const options = getOptions()
+const BUILD_OUTPUT_DIRECTORY = getBuildOutputDirectory(options)
 
 // first we check to make sure that the build output directory exists
 const nextMetaRoot = path.join(process.cwd(), BUILD_OUTPUT_DIRECTORY)
