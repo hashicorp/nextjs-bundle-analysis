@@ -2,46 +2,74 @@ const path = require('path')
 const fs = require('fs')
 const { execSync } = require('child_process')
 const rimraf = require('rimraf')
-const { afterAll, beforeAll, expect } = require('@jest/globals')
+const { afterEach, beforeEach, expect } = require('@jest/globals')
 const mkdirp = require('mkdirp')
+const { getBuildOutputDirectory, getOptions } = require('../utils')
 
 const fixturesPath = path.join(__dirname, '__fixtures__')
 
-beforeAll(() => {
-  process.chdir(fixturesPath)
-  execSync('npm install')
-  execSync('npm run build')
-})
+// Get all test suites (fixtures)
+const fixtures = fs
+  .readdirSync(fixturesPath, { withFileTypes: true })
+  .filter((dirent) => dirent.isDirectory())
+  .map((dirent) => dirent.name)
 
-afterAll(() => {
-  rimraf.sync(path.join(fixturesPath, '.next'))
-})
+describe('sort of integration', () => {
+  fixtures.forEach((dirName) => {
+    describe(`fixture ${dirName}`, () => {
+      const cwd = path.join(fixturesPath, dirName)
+      const options = getOptions(cwd)
+      const buildOutputDirectory = getBuildOutputDirectory(options)
 
-test('sort of integration', () => {
-  // make sure the 'report' command works
-  execSync('node ../../report.js')
-  const bundleAnalysis = fs.readFileSync(
-    path.join(process.cwd(), '.next/analyze/__bundle_analysis.json'),
-    'utf8'
-  )
-  expect(bundleAnalysis.length).toBeGreaterThan(1)
+      beforeEach(() => {
+        process.chdir(cwd)
+        execSync('npm install')
+        execSync('npm run build')
+      })
 
-  // create a fake artifact download - in the real world this would pull from
-  // github as part of the action flow
-  mkdirp.sync(path.join(process.cwd(), '.next/analyze/base/bundle'))
-  fs.writeFileSync(
-    path.join(
-      process.cwd(),
-      '.next/analyze/base/bundle/__bundle_analysis.json'
-    ),
-    bundleAnalysis
-  )
+      afterEach(() => {
+        rimraf.sync(path.join(cwd, buildOutputDirectory))
+      })
 
-  // make sure the 'compare' command works
-  execSync('node ../../compare.js')
-  const comment = fs.readFileSync(
-    path.join(process.cwd(), '.next/analyze/__bundle_analysis_comment.txt'),
-    'utf8'
-  )
-  expect(comment).toMatch(/no changes to the javascript bundle/)
+      test(`bundle analysis action generates report and compares artifacts correctly ${dirName}`, () => {
+        // make sure the 'report' command works
+        execSync('node ../../../report.js')
+        const bundleAnalysis = fs.readFileSync(
+          path.join(
+            process.cwd(),
+            buildOutputDirectory,
+            'analyze/__bundle_analysis.json'
+          ),
+          'utf8'
+        )
+        expect(bundleAnalysis.length).toBeGreaterThan(1)
+
+        // create a fake artifact download - in the real world this would pull from
+        // github as part of the action flow
+        mkdirp.sync(
+          path.join(process.cwd(), buildOutputDirectory, 'analyze/base/bundle')
+        )
+        fs.writeFileSync(
+          path.join(
+            process.cwd(),
+            buildOutputDirectory,
+            'analyze/base/bundle/__bundle_analysis.json'
+          ),
+          bundleAnalysis
+        )
+
+        // make sure the 'compare' command works
+        execSync('node ../../../compare.js')
+        const comment = fs.readFileSync(
+          path.join(
+            process.cwd(),
+            buildOutputDirectory,
+            'analyze/__bundle_analysis_comment.txt'
+          ),
+          'utf8'
+        )
+        expect(comment).toMatch(/no changes to the javascript bundle/)
+      })
+    })
+  })
 })

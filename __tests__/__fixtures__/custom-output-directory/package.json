@@ -1,0 +1,21 @@
+{
+  "name": "bundle-analysis-test-fixture",
+  "version": "1.0.0",
+  "description": "its a test",
+  "main": "index.js",
+  "author": "",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "next": "^11.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "scripts": {
+    "build": "next build"
+  },
+  "nextBundleAnalysis": {
+    "budget": 358400,
+    "budgetPercentIncreaseRed": 20,
+    "buildOutputDirectory": "dist"
+  }
+}

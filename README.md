@@ -20,7 +20,12 @@ Config values are written to `package.json` under the key `nextBundleAnalysis`, 
 
 There is one config value, `showDetails`, that is set to "true" by default. This option renders a collapsed "details" section under each section of the bundle analysis comment explaining some of the finer details of the numbers provided. If you feel like this is not necessary and you and/or those working on your project understand the details, you can set this option to `false` and that section will not render.
 
-If your application builds to a directory other than `.next`, you can specify this with the key `buildOutputDirectory`.
+If your application [builds to a custom directory](https://nextjs.org/docs/api-reference/next.config.js/setting-a-custom-build-directory), you can specify this with the key `buildOutputDirectory`. You will also need to replace all instances of `.next` in `next_bundle_analysis.yml` with your custom output directory.
+
+For example, if you build to `dist`, you should:
+
+- Set `package.json.nextBundleAnalysis.buildOutputDirectory` to `"dist"`.
+- In `nextjs_bundle_analysis`, replace all instances of `.next` with `dist`.
 
 ### Caveats
 
