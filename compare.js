@@ -4,28 +4,29 @@ const filesize = require('filesize')
 const numberToWords = require('number-to-words')
 const fs = require('fs')
 const path = require('path')
-
-// import the current and base branch bundle stats
-const currentBundle = require(path.join(
-  process.cwd(),
-  '.next/analyze/__bundle_analysis.json'
-))
-const baseBundle = require(path.join(
-  process.cwd(),
-  '.next/analyze/base/bundle/__bundle_analysis.json'
-))
+const { getBuildOutputDirectory, getOptions } = require('./utils')
 
 // Pull options from `package.json`
-const options = require(path.join(
-  process.cwd(),
-  'package.json'
-)).nextBundleAnalysis
+const options = getOptions()
 
 const BUDGET = options.budget
 const BUDGET_PERCENT_INCREASE_RED = options.budgetPercentIncreaseRed
 // this must be explicitly set to false not to render
 const SHOW_DETAILS =
   options.showDetails === undefined ? true : options.showDetails
+const BUILD_OUTPUT_DIRECTORY = getBuildOutputDirectory(options)
+
+// import the current and base branch bundle stats
+const currentBundle = require(path.join(
+  process.cwd(),
+  BUILD_OUTPUT_DIRECTORY,
+  'analyze/__bundle_analysis.json'
+))
+const baseBundle = require(path.join(
+  process.cwd(),
+  BUILD_OUTPUT_DIRECTORY,
+  'analyze/base/bundle/__bundle_analysis.json'
+))
 
 // kick it off
 let output = `## 📦 Next.js Bundle Analysis
@@ -173,7 +174,11 @@ console.log(output)
 // and to cap it off, we write the output to a file which is later read in as comment
 // contents by the actions workflow.
 fs.writeFileSync(
-  path.join(process.cwd(), '.next/analyze/__bundle_analysis_comment.txt'),
+  path.join(
+    process.cwd(),
+    BUILD_OUTPUT_DIRECTORY,
+    'analyze/__bundle_analysis_comment.txt'
+  ),
   output.trim()
 )
 
