@@ -1,10 +1,18 @@
 #!/usr/bin/env node
 
-const filesize = require('filesize')
+const originalFilesize = require('filesize')
 const numberToWords = require('number-to-words')
 const fs = require('fs')
 const path = require('path')
 const { getBuildOutputDirectory, getOptions } = require('./utils')
+
+// Override default filesize options to display a non-breakable space as a spacer.
+const filesize = (bytes, options) => {
+  return originalFilesize(bytes, {
+    spacer: ' ',
+    ...options,
+  })
+}
 
 // Pull options from `package.json`
 const options = getOptions()
