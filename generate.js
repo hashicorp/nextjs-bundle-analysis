@@ -28,6 +28,12 @@ inquirer
         'If you exceed this percentage of the budget or filesize, it will be highlighted in red',
       default: 20,
     },
+    {
+      type: 'number',
+      name: 'minimumChangeThreshold',
+      message: `If a page's size change is below this threshold (in bytes), it will be considered unchanged'`,
+      default: 0,
+    },
   ])
   .then((answers) => {
     // write the config values to package.json
@@ -36,6 +42,7 @@ inquirer
     packageJsonContent.nextBundleAnalysis = {
       budget: answers.budget * 1024,
       budgetPercentIncreaseRed: answers.redIndicatorPercentage,
+      minimumChangeThreshold: answers.minimumChangeThreshold,
       showDetails: true, // add a default "showDetails" argument
     }
     fs.writeFileSync(
