@@ -26,7 +26,7 @@
     "action"
   ],
   "author": "Jeff Escalante",
-  "license": "GPL-2.0",
+  "license": "MPL-2.0",
   "jest": {
     "testPathIgnorePatterns": [
       "/node_modules/",
