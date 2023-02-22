@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
 
-      # If pnpm is used, you need to switch the previous step with the following one. pnpm does not create a packages-lock.file
+      # If pnpm is used, you need to switch the previous step with the following one. pnpm does not create a package-lock.json
       # so the step above will fail to pull dependencies
       # - uses: pnpm/action-setup@v2
       #   name: Install pnpm
