@@ -6,13 +6,11 @@ Analyzes each PR's impact on your next.js app's bundle size and displays it usin
 
 ## Installation
 
-It's pretty simple to get this set up, just run the following command and answer the prompts. The command will create a `.github/workflows` directory in your project root and add a `next_bundle_analysis.yml` file to it - that's all it takes!
+It's pretty simple to get this set up. Run the following command and answer the prompts. The command will create a `.github/workflows` directory in your project root and add a `next_bundle_analysis.yml` file to it - that's all it takes!
 
 ```sh
 $ npx -p nextjs-bundle-analysis generate
 ```
-
-> **NOTE**: Due to github actions' lack of support for more complex actions, the experience of getting this set up is unusual in that it requires a generation script which copies most of the logic into your project directly. As soon as github adds support for the [features](https://github.com/actions/runner/pull/1144) [needed](https://github.com/actions/runner/pull/1144#discussion_r651087316) to properly package up this action, we'll put out an update that removes the extra boilerplate and makes usage much simpler. Until then, we all have no choice but to endure this unusual setup process.
 
 ## Configuration
 

@@ -3,7 +3,7 @@
   "version": "0.4.0",
   "description": "Analyzes each PR's impact on your next.js app's bundle size and displays it using a comment",
   "bin": {
-    "generate": "./generate.js",
+    "generate": "./generate.mjs",
     "report": "./report.js",
     "compare": "./compare.js"
   },
@@ -38,11 +38,12 @@
   },
   "homepage": "https://github.com/hashicorp/nextjs-bundle-analysis#readme",
   "dependencies": {
+    "@clack/prompts": "^0.5.1",
     "filesize": "^7.0.0",
     "gzip-size": "^6.0.0",
-    "inquirer": "^8.1.1",
     "mkdirp": "^1.0.4",
-    "number-to-words": "^1.2.4"
+    "number-to-words": "^1.2.4",
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "jest": "^27.0.6",

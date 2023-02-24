@@ -1,31 +1,20 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
-
 name: 'Next.js Bundle Analysis'
 
 on:
   pull_request:
   push:
     branches:
-      - main # change this if your default branch is named differently
+      # change this if your default branch is named differently
+      - main
   workflow_dispatch:
-
-defaults:
-  run:
-    # change this if your nextjs app does not live at the root of the repo
-    working-directory: ./
-
-permissions:
-  contents: read # for checkout repository
-  actions: read # for fetching base branch bundle stats
-  pull-requests: write # for comments
 
 jobs:
   analyze:
-    uses: hashicorp/nextjs-bundle-analysis/.github/workflows/analyze.yml
-    with:
-      # Uncomment any of the following inputs if you need to change the defaults
-      # node-version: 18
-      # package-manager: npm
-      # working-directory: ./
-      # build-command: ./node_modules/.bin/next build
+    uses: hashicorp/nextjs-bundle-analysis/.github/workflows/analyze.yml@{PACKAGE_VERSION}
+    # with:
+    #   node-version: 18
+    #   package-manager: npm
+    #   working-directory: ./
+    #   build-command: ./node_modules/.bin/next build
