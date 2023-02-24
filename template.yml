@@ -95,16 +95,14 @@ jobs:
         if: success() && github.event.number
         run: ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis compare
 
-      - name: Get comment body
+      - name: Get Comment Body
         id: get-comment-body
         if: success() && github.event.number
-        uses: actions/github-script@v6
-        with:
-          result-encoding: string
-          script: |
-            const fs = require('fs')
-            const comment = fs.readFileSync('.next/analyze/__bundle_analysis_comment.txt', 'utf8')
-            core.setOutput('body', comment)
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+        run: |
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$(cat .next/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
