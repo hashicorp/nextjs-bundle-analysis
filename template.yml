@@ -17,4 +17,5 @@ jobs:
     #   node-version: 18
     #   package-manager: npm
     #   working-directory: ./
+    #   build-output-directory: .next
     #   build-command: ./node_modules/.bin/next build

@@ -27,7 +27,7 @@ Config values are written to `package.json` under the key `nextBundleAnalysis`, 
 For example, if you build to `dist`, you should:
 
 - Set `package.json.nextBundleAnalysis.buildOutputDirectory` to `"dist"`.
-- In `nextjs_bundle_analysis`, replace all instances of `.next` with `dist`.
+- In `next_bundle_analysis.yml`, update the `build-output-directory` input to `dist`.
 
 ### `budget (number)`
 

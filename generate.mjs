@@ -21,12 +21,13 @@ import fs from 'node:fs'
 import mkdirp from 'mkdirp'
 
 const WORKFLOW_TEMPLATE_FILE = 'template.yml'
-const WORKFLOW_FILE = 'nextjs_bundle_analysis.yml'
+const WORKFLOW_FILE = 'next_bundle_analysis.yml'
 
 const DEFAULT_PACKAGE_CONFIG = {
   budget: 350,
   budgetPercentIncreaseRed: 20,
   minimumChangeThreshold: 0,
+  buildOutputDirectory: '.next',
   showDetails: true,
 }
 
@@ -36,6 +37,7 @@ const DEFAULT_WORKFLOW_CONFIG = {
   packageManager: 'npm',
   workingDirectory: './',
   buildCommand: './node_modules/.bin/next build',
+  buildOutputDirectory: DEFAULT_PACKAGE_CONFIG.buildOutputDirectory,
 }
 
 async function number(opts) {
@@ -94,6 +96,10 @@ async function writeWorkflowFile(config) {
         `  working-directory: ${config.workingDirectory}`
       )
       .replace(
+        /#\s+build-output-directory:.+$/m,
+        `  build-output-directory: ${config.buildOutputDirectory}`
+      )
+      .replace(
         /#\s+build-command:.+$/m,
         `  build-command: ${config.buildCommand}`
       )
@@ -133,6 +139,11 @@ async function main() {
       number({
         message: `If a page's size change is below this threshold (in bytes), it will be considered unchanged (default: ${DEFAULT_PACKAGE_CONFIG.minimumChangeThreshold})`,
         defaultValue: DEFAULT_PACKAGE_CONFIG.minimumChangeThreshold,
+      }),
+    buildOutputDirectory: () =>
+      text({
+        message: `Do you have a custom dist directory? (default: ${DEFAULT_PACKAGE_CONFIG.buildOutputDirectory})`,
+        defaultValue: DEFAULT_PACKAGE_CONFIG.buildOutputDirectory,
       }),
   })
 
@@ -175,7 +186,10 @@ async function main() {
       }),
   })
 
-  await writeWorkflowFile(workflowConfig)
+  await writeWorkflowFile({
+    ...workflowConfig,
+    buildOutputDirectory: packageConfig.buildOutputDirectory,
+  })
 
   outro(
     '✅ Workflow file written to .github/workflows/next-js-bundle-analysis.yml'
