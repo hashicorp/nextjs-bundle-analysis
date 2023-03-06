@@ -280,7 +280,7 @@ function renderSize(d, showBudgetDiff) {
   const gzd = d.gzipDiff
   const percentChange = (gzd / d.gzip) * 100
   return ` | \`${filesize(d.gzip)}\`${
-    gzd && !showBudgetDiff
+    gzd && (options.alwaysShowGzipDiff || !showBudgetDiff)
       ? ` _(${renderStatusIndicator(percentChange)}${filesize(gzd)})_`
       : ''
   }`
