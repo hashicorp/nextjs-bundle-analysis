@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "jest",
+    "release:canary": "changeset publish --tag canary",
     "release:patch": "release patch && npm publish .",
     "release:minor": "release minor && npm publish .",
     "release:major": "release major && npm publish ."
@@ -45,6 +46,8 @@
     "number-to-words": "^1.2.4"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.8",
+    "@changesets/cli": "^2.26.1",
     "jest": "^27.0.6",
     "release": "^6.3.0",
     "rimraf": "^3.0.2"

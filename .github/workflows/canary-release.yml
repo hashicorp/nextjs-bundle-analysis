@@ -1,0 +1,16 @@
+name: Canary Release
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+
+jobs:
+  release-canary:
+    uses: hashicorp/web-platform-packages/.github/workflows/canary-release.yml@8f20ba3ccb4ffe9a9bc0b14060af00929e6655f1
+    secrets:
+      PUBLISH_GITHUB_TOKEN: ${{ secrets.CHANGESETS_PAT }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
