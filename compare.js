@@ -1,10 +1,23 @@
 #!/usr/bin/env node
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
 
-const filesize = require('filesize')
+
+const originalFilesize = require('filesize')
 const numberToWords = require('number-to-words')
 const fs = require('fs')
 const path = require('path')
 const { getBuildOutputDirectory, getOptions } = require('./utils')
+
+// Override default filesize options to display a non-breakable space as a spacer.
+const filesize = (bytes, options) => {
+  return originalFilesize(bytes, {
+    spacer: ' ',
+    ...options,
+  })
+}
 
 // Pull options from `package.json`
 const options = getOptions()
@@ -43,17 +56,23 @@ delete currentBundle.__global
 delete baseBundle.__global
 
 // calculate the difference between the current bundle and the base branch's
-const globalBundleChanges =
-  globalBundleCurrent.gzip !== globalBundleBase.gzip
-    ? {
-        page: 'global',
-        raw: globalBundleCurrent.raw,
-        gzip: globalBundleCurrent.gzip,
-        gzipDiff: globalBundleCurrent.gzip - globalBundleBase.gzip,
-        increase:
-          Math.sign(globalBundleCurrent.gzip - globalBundleBase.gzip) > 0,
-      }
-    : false
+let globalBundleChanges = false
+const globalGzipDiff = globalBundleCurrent.gzip - globalBundleBase.gzip
+// only report a global bundle size change if we don't have a minimum change
+// threshold configured, or if the change is greater than the threshold
+if (
+  globalGzipDiff !== 0 &&
+  (!('minimumChangeThreshold' in options) ||
+    Math.abs(globalGzipDiff) > options.minimumChangeThreshold)
+) {
+  globalBundleChanges = {
+    page: 'global',
+    raw: globalBundleCurrent.raw,
+    gzip: globalBundleCurrent.gzip,
+    gzipDiff: globalGzipDiff,
+    increase: Math.sign(globalGzipDiff) > 0,
+  }
+}
 
 // now we're going to go through each of the pages in the current bundle and
 // run analysis on each one.
@@ -75,7 +94,14 @@ for (let page in currentBundle) {
     const rawDiff = currentStats.raw - baseStats.raw
     const gzipDiff = currentStats.gzip - baseStats.gzip
     const increase = !!Math.sign(gzipDiff)
-    changedPages.push({ page, ...currentStats, rawDiff, gzipDiff, increase })
+    // only report a page size change if we don't have a minimum change
+    // threshold configured, or if the change is greater than the threshold
+    if (
+      !('minimumChangeThreshold' in options) ||
+      Math.abs(gzipDiff) > options.minimumChangeThreshold
+    ) {
+      changedPages.push({ page, ...currentStats, rawDiff, gzipDiff, increase })
+    }
   }
 }
 
