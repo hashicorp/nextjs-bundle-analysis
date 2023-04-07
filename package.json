@@ -9,10 +9,8 @@
   },
   "scripts": {
     "test": "jest",
-    "release:canary": "changeset publish --tag canary",
-    "release:patch": "release patch && npm publish .",
-    "release:minor": "release minor && npm publish .",
-    "release:major": "release major && npm publish ."
+    "release": "changeset publish",
+    "release:canary": "changeset publish --tag canary"
   },
   "repository": {
     "type": "git",
