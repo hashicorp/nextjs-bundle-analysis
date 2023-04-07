@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    uses: hashicorp/web-platform-packages/.github/workflows/release.yml@8f20ba3ccb4ffe9a9bc0b14060af00929e6655f1
+    secrets:
+      PUBLISH_GITHUB_TOKEN: ${{ secrets.CHANGESETS_PAT }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
