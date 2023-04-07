@@ -43,6 +43,10 @@ For example, if you build to `dist`, you should:
 
 (Optional, defaults to `0`) The threshold under which pages will be considered unchanged. For example, if `minimumChangeThreshold` was set to `500` and a page's size increased by `300 B`, it will be considered unchanged.
 
+### `skipCommentIfEmpty (boolean)`
+
+(Optional, defaults to `false`) When set to `true`, if no pages have changed size the generated comment will be an empty string.
+
 ## Caveats
 
 - This plugin only analyzes the direct bundle output from next.js. If you have added any other scripts via the `<script>` tag, especially third party scripts and things like analytics or other tracking scripts, these are not included in the analysis. Scripts of this nature should _probably_ be loaded in behind a consent manager and should not make an impact on your initial load, and as long as this is how you handle them it should make no difference, but it's important to be aware of this and account for the extra size added by these scripts if they are present in your app.
