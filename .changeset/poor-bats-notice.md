@@ -2,4 +2,4 @@
 'nextjs-bundle-analysis': minor
 ---
 
-Add app name to comment for uniqueness
+Improve monorepo support by adding the `name` from `package.json` to the generated comment. Add support for a `skipCommentIfEmpty` configuration option that will set the comment to an empty string when no pages have changed size.
