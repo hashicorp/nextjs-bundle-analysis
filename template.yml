@@ -107,5 +107,5 @@ jobs:
       - name: Comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: next-touched-pages
+          header: next-bundle-analysis
           message: ${{ steps.get-comment-body.outputs.body }}
