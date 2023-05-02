@@ -36,7 +36,7 @@ inquirer
     {
       type: 'number',
       name: 'minimumChangeThreshold',
-      message: `If a page's size change is below this threshold (in bytes), it will be considered unchanged'`,
+      message: `If a page's size change is below this threshold (in bytes), it will be considered unchanged`,
       default: 0,
     },
   ])
