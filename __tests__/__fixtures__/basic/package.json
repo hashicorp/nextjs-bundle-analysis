@@ -1,5 +1,5 @@
 {
-  "name": "bundle-analysis-test-fixture",
+  "name": "bundle-analysis-test-basic",
   "version": "1.0.0",
   "description": "its a test",
   "main": "index.js",
