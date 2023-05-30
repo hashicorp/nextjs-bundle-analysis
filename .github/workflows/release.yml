@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    uses: hashicorp/web-platform-packages/.github/workflows/release.yml@69853727452b125f28e777ca7c1e71c82edd30aa
+    uses: hashicorp/web-platform-packages/.github/workflows/release.yml@ca69d24e37c78f0f63e4a03432f63b8cc47ffc3e
     secrets:
       CHANGESETS_PAT: ${{ secrets.CHANGESETS_PAT }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
