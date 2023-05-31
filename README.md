@@ -52,3 +52,12 @@ For example, if you build to `dist`, you should:
 - This plugin only analyzes the direct bundle output from next.js. If you have added any other scripts via the `<script>` tag, especially third party scripts and things like analytics or other tracking scripts, these are not included in the analysis. Scripts of this nature should _probably_ be loaded in behind a consent manager and should not make an impact on your initial load, and as long as this is how you handle them it should make no difference, but it's important to be aware of this and account for the extra size added by these scripts if they are present in your app.
 - Since this plugin works by comparing the base bundle against each PR, the first time it is run, it will fail since it has no base to compare against. This is expected - ideally you can just commit the changes directly to your default branch, where it will run to generate the base bundle, then anything that branches off after that will have a valid comparison point and the script will work as expected.
 - This script assumes that running `next build` will successfully build your application. If you need additional scripts or logic to do so, you may need to update the action step called "Build next.js app" to the command needed to build your app. For example, if you have a `npm run build` step, that would be a good target to change it to. We plan to make this configurable via the generator in the future.
+- The used action `dawidd6/action-download-artifact@v2` works fine with public repo, if you're using this github action in a private repo you should create a github access token to access workflows artifact as reported in their [docs](https://github.com/dawidd6/action-download-artifact#usage):
+
+```yaml
+- name: Download artifact
+  id: download-artifact
+  uses: dawidd6/action-download-artifact@v2
+  with:
+    github_token: ${{secrets.GITHUB_TOKEN}}
+```
