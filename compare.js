@@ -29,6 +29,7 @@ const SHOW_DETAILS =
 const BUILD_OUTPUT_DIRECTORY = getBuildOutputDirectory(options)
 const PACKAGE_NAME = options.name
 const SKIP_COMMENT_IF_EMPTY = options.skipCommentIfEmpty
+const COLLAPSIBLE_CHANGED_PAGES = options.collapsibleChangedPages
 
 // import the current and base branch bundle stats
 const currentBundle = require(path.join(
@@ -165,7 +166,8 @@ if (changedPages.length) {
 The following page${plural} changed size from the code in this PR compared to its base branch:
 
 `
-  output += markdownTable(changedPages, globalBundleCurrent, globalBundleBase)
+  const table = markdownTable(changedPages, globalBundleCurrent, globalBundleBase);
+  output += COLLAPSIBLE_CHANGED_PAGES ? `<details><summary>Changed page${plural}</summary>\n\n${table}\n</details>\n` : table
 
   // this details section is a bit more responsive, it will render slightly different
   // details depending on whether a budget is being used, since the information presented
