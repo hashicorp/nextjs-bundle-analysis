@@ -73,7 +73,7 @@ describe('sort of integration', () => {
           ),
           'utf8'
         )
-        expect(comment).toMatch(/no changes to the javascript bundle/)
+        expect(comment).toMatch(/no changes to the JavaScript bundle/)
       })
     })
   })
