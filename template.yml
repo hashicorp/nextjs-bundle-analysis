@@ -37,9 +37,11 @@ jobs:
           node-version: 18
           cache: 'npm'
           # cache: 'pnpm'
+          # cache: 'yarn'
 
       - run: npm install
       # - run: pnpm install
+      # - run: yarn install --frozen-lockfile
 
       - name: Restore next build
         uses: actions/cache@v3
