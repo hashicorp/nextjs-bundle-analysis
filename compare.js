@@ -192,10 +192,6 @@ if (hasNoChanges) {
   output += 'This PR introduced no changes to the JavaScript bundle! 🙌'
 }
 
-// we add this tag so that our action can be able to easily and consistently find the
-// right comment to edit as more commits are pushed.
-output += `<!-- __NEXTJS_BUNDLE_${PACKAGE_NAME} -->`
-
 // however, if ignoreIfEmpty is true, set output to an empty string
 if (hasNoChanges && SKIP_COMMENT_IF_EMPTY) {
   output = ''
