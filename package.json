@@ -39,7 +39,7 @@
   "dependencies": {
     "filesize": "^7.0.0",
     "gzip-size": "^6.0.0",
-    "inquirer": "^8.1.1",
+    "inquirer": "^9.2.7",
     "mkdirp": "^1.0.4",
     "number-to-words": "^1.2.4"
   },
