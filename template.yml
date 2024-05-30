@@ -13,6 +13,8 @@ on:
 defaults:
   run:
     # change this if your nextjs app does not live at the root of the repo
+    # note: this only affects `run` steps, so you also need to adjust the
+    # paths in `uses` steps
     working-directory: ./
 
 permissions:
@@ -51,6 +53,7 @@ jobs:
         with:
           # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
           # ex: if your app builds to `dist`, replace `.next` with `dist`
+          # also, prefix this with your app directory if it's not at the root
           path: .next/cache
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -68,6 +71,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: bundle
+          # prefix this with your app directory if it's not at the root
           path: .next/analyze/__bundle_analysis.json
 
       - name: Download base branch bundle stats
@@ -76,6 +80,7 @@ jobs:
         with:
           workflow: nextjs_bundle_analysis.yml
           branch: ${{ github.event.pull_request.base.ref }}
+          # prefix this with your app directory if it's not at the root
           path: .next/analyze/base
 
       # And here's the second place - this runs after we have both the current and
