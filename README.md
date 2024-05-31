@@ -6,7 +6,7 @@ Analyzes each PR's impact on your next.js app's bundle size and displays it usin
 
 ## Installation
 
-It's pretty simple to get this set up, just run the following command and answer the prompts. The command will create a `.github/workflows` directory in your project root and add a `next_bundle_analysis.yml` file to it - that's all it takes!
+It's pretty simple to get this set up, just run the following command and answer the prompts. The command will create a `.github/workflows` directory in your project root and add a `nextjs_bundle_analysis.yml` file to it - that's all it takes!
 
 ```sh
 $ npx -p nextjs-bundle-analysis generate
@@ -24,7 +24,7 @@ Config values are written to `package.json` under the key `nextBundleAnalysis`, 
 
 ### `buildOutputDirectory (string)`
 
-(Optional, defaults to `.next`) If your application [builds to a custom directory](https://nextjs.org/docs/api-reference/next.config.js/setting-a-custom-build-directory), you can specify this with the key `buildOutputDirectory`. You will also need to replace all instances of `.next` in `next_bundle_analysis.yml` with your custom output directory.
+(Optional, defaults to `.next`) If your application [builds to a custom directory](https://nextjs.org/docs/api-reference/next.config.js/setting-a-custom-build-directory), you can specify this with the key `buildOutputDirectory`. You will also need to replace all instances of `.next` in `nextjs_bundle_analysis.yml` with your custom output directory.
 
 For example, if you build to `dist`, you should:
 
