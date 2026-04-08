@@ -21,60 +21,127 @@ on:
         required: false
         type: string
         default: ./
-      build-build-output-directory:
+      build-output-directory:
         description: 'The distDir specified in your Next.js config'
         required: false
         type: string
-        default: '.next'
+        default: ''
       build-command:
         description: 'If your app uses a custom build command, override this. Defaults to `next build`.'
         required: false
         type: string
         default: ./node_modules/.bin/next build
+      output-mode:
+        description: 'How bundle analysis should be published. One of: comment, check, both.'
+        required: false
+        type: string
+        default: ''
+      minimum-change-threshold:
+        description: 'Override the repo config threshold for page bundle change reporting and check-mode PR comments.'
+        required: false
+        type: string
+        default: ''
+      minimum-total-change-threshold:
+        description: 'Override the repo config threshold for check-mode PR comments on global bundle increases.'
+        required: false
+        type: string
+        default: ''
+      skip-comment-if-empty:
+        description: 'Override the repo config to skip posting empty comments when no bundle changes are detected.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+      NEXTJS_BUNDLE_ANALYSIS_OUTPUT_MODE: ${{ inputs.output-mode }}
+      NEXTJS_BUNDLE_ANALYSIS_MINIMUM_CHANGE_THRESHOLD: ${{ inputs.minimum-change-threshold }}
+      NEXTJS_BUNDLE_ANALYSIS_MINIMUM_TOTAL_CHANGE_THRESHOLD: ${{ inputs.minimum-total-change-threshold }}
+      NEXTJS_BUNDLE_ANALYSIS_SKIP_COMMENT_IF_EMPTY: ${{ inputs.skip-comment-if-empty }}
     permissions:
       contents: read # for checkout repository
       actions: read # for fetching base branch bundle stats
       pull-requests: write # for comments
+      checks: write # for check runs
     defaults:
       run:
         # change this if your nextjs app does not live at the root of the repo
         working-directory: ${{ inputs.working-directory }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       ### Dependency installation ###
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ inputs.node-version }}
 
       # based on the package-manager input it will use npm, yarn, or pnpm
       - name: Install dependencies
-        if: inputs.package-manager == 'npm' || inputs.package-manager == 'yarn'
-        uses: bahmutov/npm-install@v1
+        if: inputs.package-manager == 'npm'
+        run: npm ci
+
+      - name: Install dependencies (yarn)
+        if: inputs.package-manager == 'yarn'
+        run: yarn install --frozen-lockfile
 
       - name: Install dependencies (pnpm)
         if: inputs.package-manager == 'pnpm'
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
-          version: 7
-          run_install: true
+          version: 9
+          run_install: false
+
+      - name: Resolve build output directory
+        id: build-output
+        run: |
+          node <<'NODE'
+          const fs = require('fs')
+          const path = require('path')
+
+          const workflowInput = process.env.INPUT_BUILD_OUTPUT_DIRECTORY
+          let resolved = workflowInput
+
+          if (!resolved) {
+            const packageJsonPath = path.join(
+              process.env.GITHUB_WORKSPACE,
+              process.env.INPUT_WORKING_DIRECTORY,
+              'package.json'
+            )
+            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+            resolved =
+              (packageJson.nextBundleAnalysis &&
+                packageJson.nextBundleAnalysis.buildOutputDirectory) ||
+              '.next'
+          }
+
+          fs.appendFileSync(
+            process.env.GITHUB_OUTPUT,
+            `path=${resolved}\n`
+          )
+          NODE
+        env:
+          INPUT_BUILD_OUTPUT_DIRECTORY: ${{ inputs.build-output-directory }}
+          INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+
+      - name: Install dependencies (pnpm packages)
+        if: inputs.package-manager == 'pnpm'
+        run: pnpm install --frozen-lockfile
 
       ### Next build ###
       - name: Restore Next build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: restore-build-cache
         env:
           cache-name: cache-next-build
         with:
           # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
           # ex: if your app builds to `dist`, replace `.next` with `dist`
-          path: ${{ inputs.working-directory }}${{ inputs.build-output-directory }}/cache
+          path: ${{ inputs.working-directory }}${{ steps.build-output.outputs.path }}/cache
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
@@ -85,21 +152,24 @@ jobs:
       # Here's the first place where next-bundle-analysis' own script is used
       # This step pulls the raw bundle stats for the current bundle
       - name: Analyze bundle
+        env:
+          NEXTJS_BUNDLE_ANALYSIS_BUILD_OUTPUT_DIRECTORY: ${{ steps.build-output.outputs.path }}
         run: npx -p nextjs-bundle-analysis report
 
       - name: Upload bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bundle
-          path: ${{ inputs.working-directory }}${{ inputs.build-output-directory }}/analyze/__bundle_analysis.json
+          path: ${{ inputs.working-directory }}${{ steps.build-output.outputs.path }}/analyze/__bundle_analysis.json
 
       - name: Download base branch bundle stats
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v20
         if: success() && github.event.number
+        continue-on-error: true
         with:
           workflow: nextjs_bundle_analysis.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          path: ${{ inputs.working-directory }}${{ inputs.build-output-directory }}/analyze/base
+          path: ${{ inputs.working-directory }}${{ steps.build-output.outputs.path }}/analyze/base
 
       # And here's the second place - this runs after we have both the current and
       # base branch bundle stats, and will compare them to determine what changed.
@@ -116,38 +186,174 @@ jobs:
       # entry in your package.json file.
       - name: Compare with base branch bundle
         if: success() && github.event.number
-        run: ls -laR ${{ inputs.working-directory }}${{ inputs.build-output-directory }}/analyze/base && npx -p nextjs-bundle-analysis compare
+        env:
+          NEXTJS_BUNDLE_ANALYSIS_BUILD_OUTPUT_DIRECTORY: ${{ steps.build-output.outputs.path }}
+        run: npx -p nextjs-bundle-analysis compare
 
-      ### PR commenting ###
-      - name: Get Comment Body
-        id: get-comment-body
+      - name: Read bundle analysis outputs
+        id: bundle-analysis
         if: success() && github.event.number
-        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
         run: |
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ${{ inputs.working-directory }}${{ inputs.build-output-directory }}/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
-          echo EOF >> $GITHUB_OUTPUT
+          node <<'NODE'
+          const fs = require('fs')
+          const path = require('path')
 
-      - name: Find Comment
-        uses: peter-evans/find-comment@v2
+          const outputPath = path.join(
+            process.env.GITHUB_WORKSPACE,
+            process.env.INPUT_WORKING_DIRECTORY,
+            process.env.INPUT_BUILD_OUTPUT_DIRECTORY,
+            'analyze/__bundle_analysis_output.json'
+          )
+
+          const output = JSON.parse(fs.readFileSync(outputPath, 'utf8'))
+          const githubOutputPath = process.env.GITHUB_OUTPUT
+          const delimiter = `OUTPUT_${Date.now()}_${Math.random()
+            .toString(16)
+            .slice(2)}`
+
+          /**
+           * @param {string} key
+           * @param {string} value
+           */
+          function appendMultilineOutput(key, value) {
+            fs.appendFileSync(
+              githubOutputPath,
+              `${key}<<${delimiter}\n${value}\n${delimiter}\n`
+            )
+          }
+
+          appendMultilineOutput('check_name', output.checkName)
+          appendMultilineOutput('check_title', output.checkTitle)
+          fs.appendFileSync(
+            githubOutputPath,
+            `check_conclusion=${output.checkConclusion}\n`
+          )
+          appendMultilineOutput('report', output.report)
+          appendMultilineOutput('comment_body', output.commentBody || '')
+          fs.appendFileSync(
+            githubOutputPath,
+            `managed_comment_tag=${output.managedCommentTag}\n`
+          )
+          appendMultilineOutput(
+            'legacy_managed_comment_tag',
+            output.legacyManagedCommentTag || ''
+          )
+          fs.appendFileSync(
+            githubOutputPath,
+            `output_mode=${output.outputMode}\n`
+          )
+          NODE
+        env:
+          INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+          INPUT_BUILD_OUTPUT_DIRECTORY: ${{ steps.build-output.outputs.path }}
+
+      - name: Publish check run
+        uses: actions/github-script@v7
+        if: success() && github.event.number && (steps.bundle-analysis.outputs.output_mode == 'check' || steps.bundle-analysis.outputs.output_mode == 'both')
+        with:
+          script: |
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: process.env.CHECK_NAME,
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'completed',
+              conclusion: process.env.CHECK_CONCLUSION,
+              output: {
+                title: process.env.CHECK_TITLE,
+                summary: process.env.REPORT,
+              },
+            })
+        env:
+          CHECK_NAME: ${{ steps.bundle-analysis.outputs.check_name }}
+          CHECK_TITLE: ${{ steps.bundle-analysis.outputs.check_title }}
+          CHECK_CONCLUSION: ${{ steps.bundle-analysis.outputs.check_conclusion }}
+          REPORT: ${{ steps.bundle-analysis.outputs.report }}
+
+      - name: Refresh managed PR comment
+        uses: actions/github-script@v7
         if: success() && github.event.number
-        id: fc
         with:
-          issue-number: ${{ github.event.number }}
-          body-includes: '<!-- __NEXTJS_BUNDLE -->'
+          script: |
+            const issue_number = context.payload.pull_request.number
+            const marker = process.env.MANAGED_COMMENT_TAG
+            const legacyMarker = process.env.LEGACY_MANAGED_COMMENT_TAG
+            const body = process.env.COMMENT_BODY
+            const outputMode = process.env.OUTPUT_MODE
 
-      - name: Create Comment
-        uses: peter-evans/create-or-update-comment@v2
-        if: success() && github.event.number && steps.fc.outputs.comment-id == 0
-        with:
-          issue-number: ${{ github.event.number }}
-          body: ${{ steps.get-comment-body.outputs.body }}
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                per_page: 100,
+              }
+            )
 
-      - name: Update Comment
-        uses: peter-evans/create-or-update-comment@v2
-        if: success() && github.event.number && steps.fc.outputs.comment-id != 0
-        with:
-          issue-number: ${{ github.event.number }}
-          body: ${{ steps.get-comment-body.outputs.body }}
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          edit-mode: replace
+            const managedComments = comments.filter((comment) => {
+              if (!comment.body) return false
+              return comment.body.includes(marker) || (
+                legacyMarker && comment.body.includes(legacyMarker)
+              )
+            })
+
+            if (outputMode === 'comment' || outputMode === 'both') {
+              const [primaryComment, ...duplicateComments] = managedComments
+
+              for (const comment of duplicateComments) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: comment.id,
+                })
+              }
+
+              if (primaryComment) {
+                if (body && body.trim()) {
+                  await github.rest.issues.updateComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: primaryComment.id,
+                    body,
+                  })
+                } else {
+                  await github.rest.issues.deleteComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: primaryComment.id,
+                  })
+                }
+              } else if (body && body.trim()) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number,
+                  body,
+                })
+              }
+
+              return
+            }
+
+            for (const comment of managedComments) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: comment.id,
+              })
+            }
+
+            if (body && body.trim()) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body,
+              })
+            }
+        env:
+          MANAGED_COMMENT_TAG: ${{ steps.bundle-analysis.outputs.managed_comment_tag }}
+          LEGACY_MANAGED_COMMENT_TAG: ${{ steps.bundle-analysis.outputs.legacy_managed_comment_tag }}
+          COMMENT_BODY: ${{ steps.bundle-analysis.outputs.comment_body }}
+          OUTPUT_MODE: ${{ steps.bundle-analysis.outputs.output_mode }}

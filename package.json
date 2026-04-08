@@ -40,7 +40,7 @@
     "@clack/prompts": "^0.5.1",
     "filesize": "^7.0.0",
     "gzip-size": "^6.0.0",
-    "mkdirp": "^1.0.4",
+    "inquirer": "^8.2.7",
     "number-to-words": "^1.2.4",
     "picocolors": "^1.0.0"
   },

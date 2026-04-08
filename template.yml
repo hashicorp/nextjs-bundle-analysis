@@ -19,3 +19,7 @@ jobs:
     #   working-directory: ./
     #   build-output-directory: .next
     #   build-command: ./node_modules/.bin/next build
+    #   output-mode: check
+    #   minimum-change-threshold: 1024
+    #   minimum-total-change-threshold: 1024
+    #   skip-comment-if-empty: true

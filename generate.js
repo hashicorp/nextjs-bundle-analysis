@@ -7,7 +7,6 @@
 
 const path = require('path')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
 const inquirer = require('inquirer')
 
 inquirer
@@ -56,7 +55,7 @@ inquirer
     )
     // mkdir -p the .workflows directory
     const workflowsPath = path.join(process.cwd(), '.github/workflows')
-    mkdirp.sync(workflowsPath)
+    fs.mkdirSync(workflowsPath, { recursive: true })
 
     // copy the template to it
     const templatePath = path.join(__dirname, 'template.yml')
