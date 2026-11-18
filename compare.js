@@ -185,11 +185,13 @@ ${
   }
 }
 
-// and finally, if there are no changes at all, we try to be clear about that
+// Summarize the comparison when no bundle size change was reported.
 const hasNoChanges =
   !newPages.length && !changedPages.length && !globalBundleChanges
 if (hasNoChanges) {
-  output += 'This PR introduced no changes to the JavaScript bundle! 🙌'
+  output += options.minimumChangeThreshold > 0
+    ? `No gzipped JavaScript bundle size changed by more than ${options.minimumChangeThreshold} bytes.`
+    : 'No gzipped JavaScript bundle size changes to report.'
 }
 
 // we add this tag so that our action can be able to easily and consistently find the
