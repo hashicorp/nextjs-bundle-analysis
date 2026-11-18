@@ -54,13 +54,16 @@ describe('sort of integration', () => {
         mkdirp.sync(
           path.join(process.cwd(), buildOutputDirectory, 'analyze/base/bundle')
         )
+        const baseStats = JSON.parse(bundleAnalysis)
+        // A change exactly at the reporting threshold is still omitted.
+        baseStats.__global.gzip += options.minimumChangeThreshold || 0
         fs.writeFileSync(
           path.join(
             process.cwd(),
             buildOutputDirectory,
             'analyze/base/bundle/__bundle_analysis.json'
           ),
-          bundleAnalysis
+          JSON.stringify(baseStats)
         )
 
         // make sure the 'compare' command works
@@ -73,7 +76,11 @@ describe('sort of integration', () => {
           ),
           'utf8'
         )
-        expect(comment).toMatch(/no changes to the javascript bundle/)
+        expect(comment).toContain(
+          options.minimumChangeThreshold
+            ? `No gzipped JavaScript bundle size changed by more than ${options.minimumChangeThreshold} bytes.`
+            : 'No gzipped JavaScript bundle size changes to report.'
+        )
       })
     })
   })
